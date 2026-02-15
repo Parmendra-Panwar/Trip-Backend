@@ -1,0 +1,147 @@
+.container {
+  margin-top: 15px;
+  width: 100% ;
+}
+
+
+
+
+
+
+
+.hero h2 {
+  font-size: 3.5rem;
+  margin-bottom: 1rem;
+}
+
+.hero p {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+}
+
+.cta-button {
+  display: inline-block;
+  padding: 10px 30px;
+  background: #ff6347;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  font-weight: 600;
+  box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+  transition: transform ease 0.5s, box-shadow ease 0.5s;
+}
+.cta-button:hover{
+  background: rgb(213, 212, 212);
+}
+.features {
+  padding: 50px 0;
+  text-align: center;
+}
+
+.feature {
+  margin-bottom: 2rem;
+}
+
+.feature h3 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.cta-section {
+  background: #ff6347;
+  color: white;
+  padding: 25px 0;
+  text-align: center;
+}
+
+.cta-section h2 {
+  font-size: 2.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.cta-button-alt {
+  background: white;
+  color: #ff6347;
+}
+
+
+/* Hero Section */
+.hero {
+  background: url('../image/Landing.jpg') ;
+  height: 60vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  color: white;
+  text-align: center;
+  padding: 2rem 0;
+  position: relative;
+  overflow: hidden;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+.hero {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-text {
+  font-size: 4rem;
+  font-weight: 600;
+  opacity: 0;
+  transform: translateY(100px); /* Start below the screen */
+  animation: slideUp 2s ease-out forwards; /* Trigger the slide-up animation */
+}
+
+/* Keyframe animation for text to slide from the bottom */
+@keyframes slideUp {
+  0% {
+      opacity: 0;
+      transform: translateY(100px); /* Text starts off-screen */
+  }
+  100% {
+      opacity: 1;
+      transform: translateY(0); /* Text settles in the middle */
+  }
+}
+
+.logo {
+  font-size: 2.5rem;
+  font-weight: 600;
+}
+
+nav ul {
+  display: flex;
+  justify-content: center;
+  list-style: none;
+}
+
+nav ul li {
+  margin: 0 15px;
+}
+
+nav ul li a {
+  color: white;
+  text-decoration: none;
+  font-size: 1.1rem;
+}
+
+.hero-text {
+  color: white;
+  text-align: center;
+}
+
+.keyCard{
+  box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.5);
+  transition: transform ease 0.5s, box-shadow ease 0.5s;
+}
+.keyCard:hover{
+  transform: translateY(-5px);
+  box-shadow: 0px 10px 20px 2px rgba(0, 0, 0, 0.25);
+}
+
+.container{
+  margin-top: 5rem;
+}

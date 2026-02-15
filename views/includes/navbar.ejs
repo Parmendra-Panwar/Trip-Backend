@@ -1,0 +1,90 @@
+<nav class="navbar bg-body-tertiary fixed-top">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="/listings"
+      ><i class="fa-solid fa-person-hiking"></i
+    ></a>
+    <a class="navbar-brand" href="#"><b>TripLinker</b></a>
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="offcanvas"
+      data-bs-target="#offcanvasNavbar"
+      aria-controls="offcanvasNavbar"
+      aria-label="Toggle navigation"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div
+      class="offcanvas offcanvas-end"
+      tabindex="-1"
+      id="offcanvasNavbar"
+      aria-labelledby="offcanvasNavbarLabel"
+    >
+      <div class="offcanvas-header">
+        <a class="navbar-brand" href="/listings"
+          ><i class="fa-solid fa-person-hiking"></i
+        ></a>
+        <h5 class="offcanvas-title" id="offcanvasNavbarLabel">TripLinker</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="offcanvas"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="offcanvas-body">
+        <br />
+        <a class="nav-link" href="/listings">Explore</a><br />
+        <a class="nav-link" href="/listings/new">Add New Place</a><br />
+        <a class="nav-link" href="/profile">Profile</a><br />
+        <% if(!currUser){ %>
+        <a class="nav-link" href="/signup"><b>SignUp</b></a
+        ><br />
+        <a class="nav-link" href="/login"><b>Login</b> </a><br />
+        <% } %> <% if(currUser){ %>
+        <a class="nav-link" href="/logout"><b>Logout</b></a
+        ><br />
+        <%}%>
+        <!-- <form class="d-flex mt-3" role="search">
+          <input
+            class="form-control me-2"
+            type="search"
+            placeholder="Search"
+            aria-label="Search"
+          />
+          <button class="btn btn-outline-success" type="submit">Search</button>
+        </form> -->
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- <nav class="navbar navbar-expand-md bg-body-tertiary border-bottom sticky-top">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="/listings"
+      ><i class="fa-solid fa-person-hiking"></i
+    ></a>
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarNavAltMarkup"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+      <div class="navbar-nav">
+        <a class="nav-link" href="/listings">Explore</a>
+        <a class="nav-link" href="/listings/new">Add New Place</a>
+      </div>
+      <div class="navbar-nav ms-auto">
+        <%// if(!currUser){ %>
+        <a class="nav-link" href="/signup"><b>SignUp</b></a>
+        <a class="nav-link" href="/login"><b>Login</b> </a>
+        <%// } %> <%// if(currUser){ %>
+        <a class="nav-link" href="/logout"><b>Logout</b></a>
+        <%//}%>
+      </div>
+    </div>
+  </div>
+</nav> -->

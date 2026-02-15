@@ -1,0 +1,74 @@
+const cookieParser = require("cookie-parser");
+const session = require("express-session");
+
+app.use(cookieParser("secretcode"));
+app.use(session({ secret: "amiTumakeBhaloBasi", resave: false, saveUninitialized: true }))
+
+
+//cookies
+app.get("/cookies", (req, res) => {
+  res.cookie("made-in", "india", { signed: true });
+  res.send("Cookies set");
+})
+app.get("/checkforcookies", (req, res) => {
+  console.log(req.signedCookies);
+  res.send("verified");
+})
+
+//Session part 1
+app.get("/sessionCount", (req, res) => {
+  if (req.session.count) {
+    req.session.count++;
+  } else {
+    req.session.count = 1;
+  }
+  res.send(`Session Count ${req.session.count}`);
+})
+
+//Session part 2
+app.get("/register", (req, res) => {
+  let { name = "adom" } = req.query;
+  req.session.name = name;
+  if (name === "adom") {
+    req.flash("Error", "User not Registered..!")
+  } else {
+    req.flash("Sucess", "Registered Sucessfully..!")
+  }
+  res.redirect("/hello")
+})
+
+app.get("/hello", (req, res) => {
+  res.locals.SucMsg = req.flash("Sucess");
+  res.locals.ErrMsg = req.flash("Error");
+  res.render("flas.ejs", { name: req.session.name });
+})
+
+
+//damidataSave
+app.get("/dami", async (req, res, next) => {
+  let fakeUser = new User({
+    email: "student@gmail.com",
+    username: "paramveer",
+  })
+  let registeredUser = await User.register(fakeUser, "helloWorld"); res.send(registeredUser);
+})
+
+
+//routes listing.js
+/*router.post(("/listings/new"),async (req,res)=>{
+  let {title,description,image,price,country,location} = req.body;
+  let list = new Listing({
+    title:title,
+    description:description,
+    image:image[url],
+    price:price,
+    country:country,
+    location:location,
+  });
+  list.save().then(res=>{
+    console.log(res);
+  }).catch((err)=>{
+    console.log(err);
+  })
+  res.redirect("/listings");
+})*/

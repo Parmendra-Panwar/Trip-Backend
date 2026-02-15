@@ -1,0 +1,21 @@
+<% layout("/layouts/boilerplate") %>
+<h1 class="col-6 offset-3">Verify Your Email</h1>
+
+<!-- Form for verification -->
+<form action="/verify" method="post" class="mt-3">
+  <!-- Verification Code Input -->
+  <div class="mb-3">
+    <label for="verify" class="form-label"
+      >Enter Verification Code Sent to Your Email</label
+    >
+    <input
+      id="verify"
+      name="verify"
+      type="text"
+      class="form-control"
+      required
+    />
+  </div>
+  <!-- Button to verify code -->
+  <button type="submit" class="btn btn-primary">SignUp</button>
+</form>

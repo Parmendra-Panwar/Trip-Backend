@@ -1,0 +1,54 @@
+<% layout("/layouts/boilerplate") %>
+<div class="row mt-3">
+  <h1 class="col-6 offset-3">SIGNUP ON TripLinker</h1>
+  <div class="col-6 offset-3">
+    <!-- Signup form -->
+    <form
+      action="/sendVerification"
+      method="post"
+      class="needs-validation"
+      novalidate
+    >
+      <!-- Username -->
+      <div class="mb-3">
+        <label for="username" class="form-label">Username</label>
+        <input
+          id="username"
+          name="username"
+          type="text"
+          class="form-control"
+          required
+        />
+        <div class="valid-feedback">Looks Good</div>
+      </div>
+
+      <!-- Password -->
+      <div class="mb-3">
+        <label for="password" class="form-label">Password</label>
+        <input
+          id="password"
+          name="password"
+          type="password"
+          class="form-control"
+          required
+        />
+      </div>
+
+      <!-- Email -->
+      <div class="mb-3">
+        <label for="email" class="form-label">Email</label>
+        <input
+          id="email"
+          name="email"
+          type="email"
+          class="form-control"
+          required
+        />
+      </div>
+
+      <!-- Button to send verification code -->
+      <p>Send Verification Code</p>
+      <button type="submit" class="btn btn-primary">Send Code</button>
+    </form>
+  </div>
+</div>
