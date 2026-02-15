@@ -16,8 +16,6 @@ router.route("/").get(wrapAsync(listingController.index))
     wrapAsync(listingController.createNewpost)
   )
 
-router.get("/new", isloggedIn, wrapAsync(listingController.createNewget));
-
 router.route("/:id").get(wrapAsync(listingController.showListing)).delete(
   isloggedIn,
   isOwner,
@@ -28,13 +26,6 @@ router.route("/:id").get(wrapAsync(listingController.showListing)).delete(
   upload.single("image"),
   validateListing,
   wrapAsync(listingController.updateListing)
-);
-
-router.get(
-  "/:id/edit",
-  isloggedIn,
-  isOwner,
-  wrapAsync(listingController.editListing)
 );
 
 module.exports = router;

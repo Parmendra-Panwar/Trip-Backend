@@ -1,64 +1,28 @@
 const User = require("../models/user")
-const nodemailer = require('nodemailer');
-const bcrypt = require('bcryptjs');
+const passport = require("passport");
 
-module.exports.signUpGET = (req, res) => {
-  res.render("users/Aten.ejs");
-}
-
-// module.exports.signUpPOST = async (req, res) => {
-//   try {
-//     const { username, email, password } = req.body;
-
-//     // Validate input data
-//     if (!username || !email || !password) {
-//       req.flash("error", "Please fill in all fields.");
-//       return res.redirect("/signup");
-//     }
-
-//     // Check if email is already in use
-//     const existingUser = await User.findOne({ email });
-//     if (existingUser) {
-//       req.flash("error", "Email address already in use.");
-//       return res.redirect("/signup");
-//     }
-
-//     // Create a new user
-//     const newUser = new User({ email, username });
-//     const registeredUser = await User.register(newUser, password);
-//     req.login(registeredUser, (err) => {
-//       if (err) {
-//         return next();
-//       }
-//       req.flash("success", "Welcome to WonderLand!");
-//       res.redirect("/listings");
-//     })
-//   } catch (e) {
-//     // Handle specific errors
-//     if (e.name === "ValidationError") {
-//       req.flash("error", "Invalid input data.");
-//     } else {
-//       req.flash("error", "An error occurred. Please try again.");
-//     }
-//     res.redirect("/signup");
-//   }
-// }
-
-module.exports.loginGET = (req, res) => {
-  res.render("users/login.ejs");
-}
-
-
-module.exports.loginPOST = async (req, res) => {
-  req.flash("success", "Welcome back to WonderLand!");
-  let returnTo = req.session.returnTo || "/listings";
-  res.redirect(returnTo);
-}
+module.exports.login = (req, res, next) => {
+  passport.authenticate("local", (err, user, info) => {
+    if (err) {
+      return next(err);
+    }
+    if (!user) {
+      return res.status(401).json({ error: "Invalid username or password" });
+    }
+    req.logIn(user, (err) => {
+      if (err) {
+        return next(err);
+      }
+      return res.json({ message: "Welcome back to TripLinker!", user });
+    });
+  })(req, res, next);
+};
 
 module.exports.logoutUser = (req, res, next) => {
   req.logout((err) => {
-    if (err) { return next(err) };
-    req.flash("success", "You are logout");
-    res.redirect("/listings")
+    if (err) {
+      return next(err);
+    }
+    res.json({ message: "You are logged out" });
   });
 }

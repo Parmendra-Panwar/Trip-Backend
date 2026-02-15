@@ -6,9 +6,6 @@ const authController = require("../controller/authController");
 router.post("/sendVerification", authController.sendVerification);
 
 // Route to verify the code
-router.get("/verify", (req, res) => {
-  res.render("users/verify.ejs")
-})
 router.post("/verify", authController.verifyCode);
 
 // Route to complete the signup after verification
