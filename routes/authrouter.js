@@ -8,7 +8,4 @@ router.post("/sendVerification", authController.sendVerification);
 // Route to verify the code
 router.post("/verify", authController.verifyCode);
 
-// Route to complete the signup after verification
-// router.post("/completeSignup", authController.completeSignup);
-
 module.exports = router;
