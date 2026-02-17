@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const initData = require("./data.js");
 const Listing = require("../models/listing.js");
 
-const MONGO_URL = "mongodb+srv://MyAirBnB:MyAirBnB21@cluster0.y6bvz.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+const MONGO_URL = process.env.EXPO_PUBLIC_API_URL;
 
 main()
   .then(() => {
