@@ -1,5 +1,6 @@
 const Listing = require("../models/listing");
 const axios = require('axios');
+const { cloudinary } = require("../config/cloudConfig.js");
 
 module.exports.index = async (req, res) => {
   const allListings = await Listing.find({});
@@ -65,11 +66,18 @@ module.exports.destroy = async (req, res) => {
   const listing = await Listing.findById(id);
   if (!listing) throw new ExpressError(404, "Listing not found");
 
+  // 1. Cloudinary se Image Delete karo
+  if (listing.image && listing.image.filename) {
+    await cloudinary.uploader.destroy(listing.image.filename);
+  }
+
+  // 2. Associated Reviews delete karo
   if (listing.reviews.length > 0) {
     await Review.deleteMany({ _id: { $in: listing.reviews } });
   }
 
+  // 3. Database se Listing delete karo
   const deletedListing = await Listing.findByIdAndDelete(id);
 
-  res.json({ message: "Listing and associated reviews deleted", deletedListing });
+  res.json({ message: "Listing, Reviews, and Cloudinary Image deleted", deletedListing });
 };

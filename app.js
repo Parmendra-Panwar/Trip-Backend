@@ -18,7 +18,7 @@ const authRouter = require("./routes/authrouter.js");
 connectDB();
 
 // Middlewares
-app.use(cors()); // Iske bina React/App connect nahi hoga
+app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json()); // Add JSON body parser
 
