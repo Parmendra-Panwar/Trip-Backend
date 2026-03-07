@@ -24,7 +24,6 @@ const sendVerificationEmail = (email, verificationCode) => {
 
 // Signup POST to send verification email
 module.exports.sendVerification = async (req, res) => {
-  console.log("req.body >>>>>>>>>>", req.body);
   try {
     const { username, email, password } = req.body;  
 
