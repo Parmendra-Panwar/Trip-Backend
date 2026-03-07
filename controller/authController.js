@@ -25,7 +25,7 @@ const sendVerificationEmail = (email, verificationCode) => {
 // Signup POST to send verification email
 module.exports.sendVerification = async (req, res) => {
   try {
-    const { username, email, password } = req.body;  
+    const { username, email, password } = req.body;
 
     // Validate input
     if (!username || !email || !password) {
@@ -66,11 +66,11 @@ module.exports.verifyCode = async (req, res, next) => {
   if (verify === String(req.session.verificationCode)) {
     try {
       const { username, email, password } = req.session.userData;
-  
+
       // Create a new user
       const newUser = new User({ email, username });
       const registeredUser = await User.register(newUser, password); // Assuming you're using passport-local-mongoose
-  
+
       // Automatically log in the user
       req.login(registeredUser, (err) => {
         if (err) {
@@ -78,7 +78,7 @@ module.exports.verifyCode = async (req, res, next) => {
         }
         res.status(201).json({ message: "Welcome to TripLinker!", user: registeredUser });
       });
-  
+
     } catch (error) {
       console.error("Error completing signup:", error);
       res.status(500).json({ error: "An error occurred during signup." });
@@ -87,8 +87,3 @@ module.exports.verifyCode = async (req, res, next) => {
     res.status(400).json({ error: "Invalid verification code." });
   }
 };
-
-// POST route to complete signup
-// module.exports.completeSignup = async (req, res) => {
- 
-// };

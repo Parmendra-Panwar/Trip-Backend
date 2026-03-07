@@ -2,7 +2,6 @@ const passport = require("passport");
 
 module.exports.login = (req, res, next) => {
   passport.authenticate("local", (err, user, info) => {
-    console.log("Login is called : >>>>>>>>>>>>>>", req.body);
     if (err) {
       return next(err);
     }
