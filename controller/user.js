@@ -1,27 +1,12 @@
-const passport = require("passport");
+module.exports.login = async (req, res, next) => {
+  const { email, password } = req.body;
+  const user = await User.findOne({ email });
 
-module.exports.login = (req, res, next) => {
-  passport.authenticate("local", (err, user, info) => {
-    if (err) {
-      return next(err);
-    }
-    if (!user) {
-      return res.status(401).json({ error: "Invalid username or password" });
-    }
-    req.logIn(user, (err) => {
-      if (err) {
-        return next(err);
-      }
-      return res.json({ message: "Welcome back to TripLinker!", user });
-    });
-  })(req, res, next);
+  if (!user || !(await bcrypt.compare(password, user.password))) {
+    return res.status(401).json({ error: "Invalid email or password" });
+  }
+
+  const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
+
+  res.json({ token, user: { id: user._id, username: user.username, email: user.email } });
 };
-
-module.exports.logoutUser = (req, res, next) => {
-  req.logout((err) => {
-    if (err) {
-      return next(err);
-    }
-    res.json({ message: "You are logged out" });
-  });
-}

@@ -1,11 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const authController = require("../controller/authController");
+const wrapAsync = require("../utils/wrapAsync");
 
-// Route to send verification code
-router.post("/sendVerification", authController.sendVerification);
-
-// Route to verify the code
-router.post("/verify", authController.verifyCode);
+// Route to signup
+router.post("/", wrapAsync(authController.signup));
 
 module.exports = router;

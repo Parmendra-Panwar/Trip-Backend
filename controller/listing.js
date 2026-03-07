@@ -18,41 +18,29 @@ module.exports.showListing = async (req, res) => {
     })
     .populate("user");
 
-  if (!listing) {
-    return res.status(404).json({ error: "Listing not found" });
-  }
+  if (!listing) throw new ExpressError(404, "Listing not found");
 
-  const placeName = listing.location;
-  const nominatimUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(placeName)}&format=json&limit=1`;
-
-  let latitude = 20.5937; // Default
-  let longitude = 78.9629; // Default
-
+  // Coordinates logic (Nominatim)
+  let latitude = 20.5937, longitude = 78.9629;
   try {
-    const response = await axios.get(nominatimUrl, { timeout: 30000 });
-    const data = response.data;
-    if (data.length > 0) {
-      latitude = data[0].lat;
-      longitude = data[0].lon;
+    const response = await axios.get(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(listing.location)}&format=json&limit=1`, { timeout: 5000 });
+    if (response.data.length > 0) {
+      latitude = response.data[0].lat;
+      longitude = response.data[0].lon;
     }
-  } catch (error) {
-    console.error('Error fetching coordinates:', error);
-  }
+  } catch (error) { console.error('Geocoding error:', error.message); }
 
-  res.json({
-    listing,
-    latitude,
-    longitude
-  });
+  res.json({ listing, latitude, longitude });
 };
 
-module.exports.createNewpost = async (req, res, next) => {
-  let url = req.file.path;
-  let filename = req.file.filename;
+module.exports.createNewpost = async (req, res) => {
+  // Check if file exists
+  if (!req.file) throw new ExpressError(400, "Image is required");
+
   const newList = new Listing(req.body.listing);
-  newList.user = req.user._id;
-  newList.image = { url, filename }
-  console.log(newList)
+  newList.user = req.user._id; // req.user now comes from JWT middleware
+  newList.image = { url: req.file.path, filename: req.file.filename };
+
   await newList.save();
   res.status(201).json(newList);
 };
@@ -73,6 +61,15 @@ module.exports.updateListing = async (req, res) => {
 
 module.exports.destroy = async (req, res) => {
   let { id } = req.params;
-  let deleteListing = await Listing.findByIdAndDelete(id);
-  res.json({ message: "Listing Deleted", deletedListing: deleteListing });
+
+  const listing = await Listing.findById(id);
+  if (!listing) throw new ExpressError(404, "Listing not found");
+
+  if (listing.reviews.length > 0) {
+    await Review.deleteMany({ _id: { $in: listing.reviews } });
+  }
+
+  const deletedListing = await Listing.findByIdAndDelete(id);
+
+  res.json({ message: "Listing and associated reviews deleted", deletedListing });
 };
