@@ -30,8 +30,8 @@ app.get("/", (req, res) => {
 // Use Routes
 app.use("/api/v1/listings", listingsRouter);
 app.use("/listings/:id/reviews", reviewsRouter);
-app.use("/login", usersRouter); // Thoda structure ke liye prefix de sakte ho
-app.use("/signup", authRouter);
+app.use("/api/v1/auth/login", usersRouter);
+app.use("/api/v1/auth/signup", authRouter);
 
 // 404 Handler
 app.all("*", (req, res, next) => {
