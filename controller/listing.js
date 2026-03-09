@@ -3,8 +3,29 @@ const axios = require('axios');
 const { cloudinary } = require("../config/cloudConfig.js");
 
 module.exports.index = async (req, res) => {
-  const allListings = await Listing.find({});
-  res.json(allListings);
+  // Query params se page aur limit nikaalo (Defaults: Page 1, Limit 12)
+  let { page = 1, limit = 12 } = req.query;
+
+  page = parseInt(page);
+  limit = parseInt(limit);
+
+  // Skip logic: Agar page 2 hai, toh pehle 12 skip karo
+  const skip = (page - 1) * limit;
+
+  const allListings = await Listing.find({})
+    .sort({ _id: -1 }) // Naye listings pehle dikhao
+    .skip(skip)
+    .limit(limit);
+
+  // Total count bhi bhej sakte ho frontend ko pagination buttons dikhane ke liye
+  const total = await Listing.countDocuments();
+
+  res.json({
+    listings: allListings,
+    currentPage: page,
+    totalPages: Math.ceil(total / limit),
+    totalListings: total
+  });
 };
 
 module.exports.showListing = async (req, res) => {
