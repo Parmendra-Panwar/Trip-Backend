@@ -19,7 +19,6 @@ module.exports.index = async (req, res) => {
 
   // Total count bhi bhej sakte ho frontend ko pagination buttons dikhane ke liye
   const total = await Listing.countDocuments();
-
   res.json({
     listings: allListings,
     currentPage: page,
