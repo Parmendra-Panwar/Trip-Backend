@@ -19,7 +19,8 @@ router.route("/")
   )
 
 router.route("/:id")
-  .get(wrapAsync(listingController.showListing)).delete(
+  .get(wrapAsync(listingController.showListing))
+  .delete(
     isloggedIn,
     isOwner,
     wrapAsync(listingController.destroy)
