@@ -29,7 +29,7 @@ app.get("/", (req, res) => {
 
 // Use Routes
 app.use("/api/v1/listings", listingsRouter);
-app.use("/listings/:id/reviews", reviewsRouter);
+app.use("/api/v1/:type/:id/reviews", reviewsRouter);
 app.use("/api/v1/auth/login", usersRouter);
 app.use("/api/v1/auth/signup", authRouter);
 
