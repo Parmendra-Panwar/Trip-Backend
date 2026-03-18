@@ -13,13 +13,14 @@ router.route("/")
   .get(wrapAsync(listingController.index))
   .post(
     isloggedIn,
-    upload.single("image"),
+    upload.array('images', 7),
     validateListing,
     wrapAsync(listingController.createNewpost)
   )
 
 router.route("/:id")
-  .get(wrapAsync(listingController.showListing)).delete(
+  .get(wrapAsync(listingController.showListing))
+  .delete(
     isloggedIn,
     isOwner,
     wrapAsync(listingController.destroy)
@@ -27,7 +28,7 @@ router.route("/:id")
   .put(
     isloggedIn,
     isOwner,
-    upload.single("image"),
+    upload.array('images', 7),
     validateListing,
     wrapAsync(listingController.updateListing)
   );

@@ -13,6 +13,7 @@ const listingsRouter = require("./routes/listing.js");
 const reviewsRouter = require("./routes/review.js");
 const usersRouter = require("./routes/users.js");
 const authRouter = require("./routes/authrouter.js");
+const profileRouter = require("./routes/profile.js");
 
 // MongoDB connection
 connectDB();
@@ -29,9 +30,10 @@ app.get("/", (req, res) => {
 
 // Use Routes
 app.use("/api/v1/listings", listingsRouter);
-app.use("/listings/:id/reviews", reviewsRouter);
-app.use("/login", usersRouter); // Thoda structure ke liye prefix de sakte ho
-app.use("/signup", authRouter);
+app.use("/api/v1/:type/:id/reviews", reviewsRouter);
+app.use("/api/v1/auth/login", usersRouter);
+app.use("/api/v1/auth/signup", authRouter);
+app.use("/api/v1/profile", profileRouter);
 
 // 404 Handler
 app.all("*", (req, res, next) => {

@@ -1,6 +1,7 @@
 const Listing = require("../models/listing");
 const axios = require('axios');
 const { cloudinary } = require("../config/cloudConfig.js");
+const ExpressError = require("../utils/ExpressError.js");
 
 module.exports.index = async (req, res) => {
   // Query params se page aur limit nikaalo (Defaults: Page 1, Limit 12)
@@ -19,7 +20,6 @@ module.exports.index = async (req, res) => {
 
   // Total count bhi bhej sakte ho frontend ko pagination buttons dikhane ke liye
   const total = await Listing.countDocuments();
-
   res.json({
     listings: allListings,
     currentPage: page,
@@ -56,15 +56,23 @@ module.exports.showListing = async (req, res) => {
 };
 
 module.exports.createNewpost = async (req, res) => {
-  // Check if file exists
-  if (!req.file) throw new ExpressError(400, "Image is required");
+    // 1. Check if files exist
+    if (!req.files || req.files.length === 0) {
+        throw new ExpressError(400, "At least one image is required");
+    }
 
-  const newList = new Listing(req.body.listing);
-  newList.user = req.user._id; // req.user now comes from JWT middleware
-  newList.image = { url: req.file.path, filename: req.file.filename };
+    const newList = new Listing(req.body.listing);
+    newList.user = req.user._id;
 
-  await newList.save();
-  res.status(201).json(newList);
+    // 2. Map through req.files correctly
+    // FIX: f.path ki jagah f.secure_url ya f.url aur f.filename ki jagah f.public_id
+    newList.images = req.files.map(f => ({
+        url: f.secure_url || f.url, // Cloudinary secure_url deta hai
+        filename: f.public_id       // Cloudinary filename ko public_id me rakhta hai
+    }));
+
+    await newList.save();
+    res.status(201).json(newList);
 };
 
 module.exports.updateListing = async (req, res) => {
