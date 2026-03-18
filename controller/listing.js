@@ -5,22 +5,22 @@ const ExpressError = require("../utils/ExpressError.js");
 const mongoose = require('mongoose');
 
 module.exports.index = async (req, res) => {
-  // 1. lastId ko string rehne dein, parseInt na karein
+  // lastId ko string rehne dein, parseInt na karein
   let { lastId, limit = 12 } = req.query;
   limit = parseInt(limit);
 
-  // 2. Dynamic Query: Agar lastId hai toh usse purani listings uthao
+  // Dynamic Query: Agar lastId hai toh usse purani listings uthao
   let query = {};
   if (lastId && mongoose.Types.ObjectId.isValid(lastId)) {
     query = { _id: { $lt: lastId } }; // $lt (less than) kyuki _id creation time based hoti hai
   }
 
-  // 3. Fetch Listings
+  // Fetch Listings
   const listings = await Listing.find(query)
     .sort({ _id: -1 }) // Latest first
     .limit(limit);
 
-  // 4. Next Cursor taiyar karein (Aakhri item ki ID)
+  // Next Cursor taiyar karein (Aakhri item ki ID)
   const nextCursor = listings.length > 0 ? listings[listings.length - 1]._id : null;
 
   res.json({

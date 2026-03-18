@@ -42,8 +42,6 @@ module.exports.signup = async (req, res, next) => {
     // 5. Final Save
     await newUser.save();
 
-    console.log("the your you have created ",newUser)
-
     // 6. Token
     const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
 
