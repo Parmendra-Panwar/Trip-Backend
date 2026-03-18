@@ -73,3 +73,20 @@ module.exports.isActivityOwner = async (req, res, next) => {
     next(err);
   }
 };
+
+module.exports.isTripOwner = async (req, res, next) => {
+  try {
+    let { id } = req.params;
+    let Trip = require("../models/trip");
+    let trip = await Trip.findById(id);
+
+    if (!trip) return res.status(404).json({ error: "Trip not found" });
+
+    if (!trip.user._id.equals(req.user._id)) {
+      return res.status(403).json({ error: "You are not the owner" });
+    }
+    next();
+  } catch (err) {
+    next(err);
+  }
+};

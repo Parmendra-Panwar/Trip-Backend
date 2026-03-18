@@ -37,3 +37,13 @@ module.exports.activitySchema = Joi.object({
   }).required(),
   images: Joi.any() 
 });
+
+module.exports.tripSchema = Joi.object({
+  trip: Joi.object({
+    title: Joi.string().required(),
+    description: Joi.string().required(),
+    location: Joi.string().optional().allow(''),
+    tags: Joi.array().items(Joi.string().trim()).optional(),
+  }).required(),
+  images: Joi.any() 
+});
