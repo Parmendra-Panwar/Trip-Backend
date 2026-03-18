@@ -2,29 +2,31 @@ const Listing = require("../models/listing");
 const axios = require('axios');
 const { cloudinary } = require("../config/cloudConfig.js");
 const ExpressError = require("../utils/ExpressError.js");
+const mongoose = require('mongoose');
 
 module.exports.index = async (req, res) => {
-  // Query params se page aur limit nikaalo (Defaults: Page 1, Limit 12)
-  let { page = 1, limit = 12 } = req.query;
-
-  page = parseInt(page);
+  // 1. lastId ko string rehne dein, parseInt na karein
+  let { lastId, limit = 12 } = req.query;
   limit = parseInt(limit);
 
-  // Skip logic: Agar page 2 hai, toh pehle 12 skip karo
-  const skip = (page - 1) * limit;
+  // 2. Dynamic Query: Agar lastId hai toh usse purani listings uthao
+  let query = {};
+  if (lastId && mongoose.Types.ObjectId.isValid(lastId)) {
+    query = { _id: { $lt: lastId } }; // $lt (less than) kyuki _id creation time based hoti hai
+  }
 
-  const allListings = await Listing.find({})
-    .sort({ _id: -1 }) // Naye listings pehle dikhao
-    .skip(skip)
+  // 3. Fetch Listings
+  const listings = await Listing.find(query)
+    .sort({ _id: -1 }) // Latest first
     .limit(limit);
 
-  // Total count bhi bhej sakte ho frontend ko pagination buttons dikhane ke liye
-  const total = await Listing.countDocuments();
+  // 4. Next Cursor taiyar karein (Aakhri item ki ID)
+  const nextCursor = listings.length > 0 ? listings[listings.length - 1]._id : null;
+
   res.json({
-    listings: allListings,
-    currentPage: page,
-    totalPages: Math.ceil(total / limit),
-    totalListings: total
+    listings: listings,
+    nextCursor: nextCursor,
+    hasNextPage: listings.length === limit
   });
 };
 
