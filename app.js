@@ -10,6 +10,7 @@ const connectDB = require("./config/db");
 
 // Routes Import
 const listingsRouter = require("./routes/listing.js");
+const activitiesRouter = require("./routes/activity.js");
 const reviewsRouter = require("./routes/review.js");
 const usersRouter = require("./routes/users.js");
 const authRouter = require("./routes/authrouter.js");
@@ -30,6 +31,7 @@ app.get("/", (req, res) => {
 
 // Use Routes
 app.use("/api/v1/listings", listingsRouter);
+app.use("/api/v1/activities", activitiesRouter);
 app.use("/api/v1/:type/:id/reviews", reviewsRouter);
 app.use("/api/v1/auth/login", usersRouter);
 app.use("/api/v1/auth/signup", authRouter);
