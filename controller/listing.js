@@ -106,12 +106,18 @@ module.exports.updateListing = async (req, res) => {
     Object.assign(listing, req.body.listing);
 
     // 4. Image handling logic
-    if (req.file) {
-        const processedBuffer = await processImage(req.file.buffer);
-        const result = await uploadToCloudinary(processedBuffer);
-
+    if (req.files && req.files.length > 0) {
+        
         await deleteFromCloudinary(listing.images);
-        listing.images = [{ url: result.secure_url, filename: result.public_id }];
+
+        // Nayi images process aur upload karo
+        const uploadPromises = req.files.map(async (file) => {
+            const processedBuffer = await processImage(file.buffer);
+            const result = await uploadToCloudinary(processedBuffer);
+            return { url: result.secure_url, filename: result.public_id };
+        });
+
+        listing.images = await Promise.all(uploadPromises);
     }
 
     await listing.save();
