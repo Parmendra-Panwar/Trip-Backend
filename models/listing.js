@@ -19,6 +19,8 @@ const listingSchema = new Schema({
   price: { type: Number, required: true },
   location: { type: String, required: true },
   country: { type: String, required: true },
+  latitude: { type: Number }, 
+  longitude: { type: Number },
   tags: [{ type: String, trim: true, lowercase: true, default: ["wifi", "pool", "budget"] }],
   reviews: [{ type: Schema.Types.ObjectId, ref: 'Review' }],
   user: { type: Schema.Types.ObjectId, ref: 'User', index: true }

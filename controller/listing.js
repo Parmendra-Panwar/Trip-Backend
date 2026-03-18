@@ -1,8 +1,12 @@
-const Listing = require("../models/listing");
-const axios = require('axios');
-const { cloudinary } = require("../config/cloudConfig.js");
-const ExpressError = require("../utils/ExpressError.js");
+const sharp = require('sharp');
 const mongoose = require('mongoose');
+const ExpressError = require("../utils/ExpressError.js");
+const Listing = require("../models/listing");
+const Review = require("../models/review");
+const uploadToCloudinary = require("../utils/uploadToCloudinary.js");
+const getCoordinates = require("../utils/getCoordinates.js");
+const deleteFromCloudinary = require("../utils/deleteFromCloudinary.js");
+const processImage = require("../utils/imageProcess.js")
 
 module.exports.index = async (req, res) => {
   // lastId ko string rehne dein, parseInt na karein
@@ -31,84 +35,103 @@ module.exports.index = async (req, res) => {
 };
 
 module.exports.showListing = async (req, res) => {
-  let { id } = req.params;
-  const listing = await Listing.findById(id)
-    .populate({
-      path: "reviews",
-      populate: {
-        path: "author",
-        select: "username",
-      },
-    })
-    .populate("user");
+    let { id } = req.params;
+    const listing = await Listing.findById(id)
+        .populate({ path: "reviews", populate: { path: "author", select: "username" } })
+        .populate("user");
 
-  if (!listing) throw new ExpressError(404, "Listing not found");
+    if (!listing) throw new ExpressError(404, "Listing not found");
 
-  // Coordinates logic (Nominatim)
-  let latitude = 20.5937, longitude = 78.9629;
-  try {
-    const response = await axios.get(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(listing.location)}&format=json&limit=1`, { timeout: 5000 });
-    if (response.data.length > 0) {
-      latitude = response.data[0].lat;
-      longitude = response.data[0].lon;
+    // 👇 TEMPORARY GEOCODING BLOCK START (Delete later) 👇
+    if (!listing.latitude || !listing.longitude) {
+        const coords = await getCoordinates(listing.location);
+        if (coords) {
+            listing.latitude = coords.lat;
+            listing.longitude = coords.lon;
+            await listing.save();
+        }
     }
-  } catch (error) { console.error('Geocoding error:', error.message); }
+    // 👆 TEMPORARY GEOCODING BLOCK END 👆
 
-  res.json({ listing, latitude, longitude });
+    // Fallbacks if both DB and API fail
+    let latitude = listing.latitude || 20.5937;
+    let longitude = listing.longitude || 78.9629;
+
+    res.json({ listing, latitude, longitude });
 };
 
 module.exports.createNewpost = async (req, res) => {
-    // 1. Check if files exist
-    if (!req.files || req.files.length === 0) {
-        throw new ExpressError(400, "At least one image is required");
-    }
+    if (!req.files || req.files.length === 0) throw new ExpressError(400, "At least one image is required");
 
     const newList = new Listing(req.body.listing);
     newList.user = req.user._id;
 
-    // 2. Map through req.files correctly
-    // FIX: f.path ki jagah f.secure_url ya f.url aur f.filename ki jagah f.public_id
-    newList.images = req.files.map(f => ({
-        url: f.secure_url || f.url, // Cloudinary secure_url deta hai
-        filename: f.public_id       // Cloudinary filename ko public_id me rakhta hai
-    }));
+    // 1. Geocoding logic: Create ke time hi coordinates fetch karein
+    const coords = await getCoordinates(newList.location);
+    if (coords) {
+        newList.latitude = coords.lat;
+        newList.longitude = coords.lon;
+    }
 
+    // 2. Process and upload images (Sharp)
+    const uploadPromises = req.files.map(async (file) => {
+        const processedBuffer = await processImage(file.buffer);
+
+        const result = await uploadToCloudinary(processedBuffer);
+        return { url: result.secure_url, filename: result.public_id };
+    });
+
+    newList.images = await Promise.all(uploadPromises);
     await newList.save();
     res.status(201).json(newList);
 };
 
 module.exports.updateListing = async (req, res) => {
-  let { id } = req.params;
-  let listing = await Listing.findByIdAndUpdate(id, { ...req.body.listing }, { new: true });
+    let { id } = req.params;
+    
+    // 1. Purani listing find karo
+    let listing = await Listing.findById(id);
+    if (!listing) throw new ExpressError(404, "Listing not found");
 
-  if (typeof req.file !== "undefined") {
-    let url = req.file.path;
-    let filename = req.file.filename;
-    listing.image = { url, filename };
+    // 2. Check: Agar location update ho rahi hai toh Geocoding API call karo
+    if (req.body.listing?.location && req.body.listing.location !== listing.location) {
+        const coords = await getCoordinates(req.body.listing.location);
+        if (coords) {
+            listing.latitude = coords.lat;
+            listing.longitude = coords.lon;
+        }
+    }
+
+    // 3. Baaki text fields update karo
+    Object.assign(listing, req.body.listing);
+
+    // 4. Image handling logic
+    if (req.file) {
+        const processedBuffer = await processImage(req.file.buffer);
+        const result = await uploadToCloudinary(processedBuffer);
+
+        await deleteFromCloudinary(listing.images);
+        listing.images = [{ url: result.secure_url, filename: result.public_id }];
+    }
+
     await listing.save();
-  }
-
-  res.json({ message: "Listing Updated", listing });
+    res.json({ message: "Listing Updated", listing });
 };
 
 module.exports.destroy = async (req, res) => {
-  let { id } = req.params;
+    let { id } = req.params;
 
-  const listing = await Listing.findById(id);
-  if (!listing) throw new ExpressError(404, "Listing not found");
+    const listing = await Listing.findById(id);
+    if (!listing) throw new ExpressError(404, "Listing not found");
 
-  // 1. Cloudinary se Image Delete karo
-  if (listing.image && listing.image.filename) {
-    await cloudinary.uploader.destroy(listing.image.filename);
-  }
+    // Loop through the 'images' array to delete from Cloudinary
+    await deleteFromCloudinary(listing.images);
 
-  // 2. Associated Reviews delete karo
-  if (listing.reviews.length > 0) {
-    await Review.deleteMany({ _id: { $in: listing.reviews } });
-  }
+    // Associated Reviews delete
+    if (listing.reviews.length > 0) {
+        await Review.deleteMany({ _id: { $in: listing.reviews } });
+    }
 
-  // 3. Database se Listing delete karo
-  const deletedListing = await Listing.findByIdAndDelete(id);
-
-  res.json({ message: "Listing, Reviews, and Cloudinary Image deleted", deletedListing });
+    await Listing.findByIdAndDelete(id);
+    res.json({ message: "Listing and all associated data deleted" });
 };

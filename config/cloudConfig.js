@@ -1,8 +1,5 @@
-require('dotenv').config(); 
-
-// 🔥 FIX: Yahan se '.v2' hata diya hai
-const cloudinary = require('cloudinary'); 
-const CloudinaryStorage = require('multer-storage-cloudinary');
+const cloudinary = require('cloudinary').v2; // Use v2 for latest features
+const multer = require('multer');
 
 cloudinary.config({
   cloud_name: process.env.CLOUD_NAME,
@@ -10,15 +7,10 @@ cloudinary.config({
   api_secret: process.env.CLOUD_API_SECRET,
 });
 
-const storage = new CloudinaryStorage({
-  cloudinary: cloudinary, // Ab library khud iske andar se .v2 nikal legi
-  params: {
-    folder: 'wonderlust_DEV',
-    allowedFormats: ["png", "jpg", "jpeg"],
-  },
-});
+// Use Memory Storage so we can process the buffer with Sharp
+const storage = multer.memoryStorage();
 
 module.exports = {
   storage,
   cloudinary
-}
+};
