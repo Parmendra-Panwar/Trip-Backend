@@ -59,28 +59,44 @@ module.exports.createNewpost = async (req, res) => {
 
 module.exports.updateTrip = async (req, res) => {
     let { id } = req.params;
-    
     let trip = await Trip.findById(id);
     if (!trip) throw new ExpressError(404, "Trip not found");
 
-    Object.assign(trip, req.body.trip);
+    // 1. Specific Image Deletion
+    if (req.body.remainingImages) {
+        const remaining = JSON.parse(req.body.remainingImages);
+        
+        const imagesToDelete = trip.images.filter(img => 
+            !remaining.some(rem => rem.filename === img.filename)
+        );
 
-    if (req.files && req.files.length > 0) {
-        if (trip.images && trip.images.length > 0) {
-            await deleteFromCloudinary(trip.images);
+        if (imagesToDelete.length > 0) {
+            await deleteFromCloudinary(imagesToDelete);
         }
+        
+        trip.images = remaining;
+    }
 
+    // 2. Append New Images
+    if (req.files && req.files.length > 0) {
         const uploadPromises = req.files.map(async (file) => {
             const processedBuffer = await processImage(file.buffer);
             const result = await uploadToCloudinary(processedBuffer);
             return { url: result.secure_url, filename: result.public_id };
         });
 
-        trip.images = await Promise.all(uploadPromises);
+        const newImages = await Promise.all(uploadPromises);
+        trip.images.push(...newImages);
     }
 
+    // 3. Update Text Fields
+    const updateData = { ...req.body.trip };
+    delete updateData.images;
+
+    Object.assign(trip, updateData);
+
     await trip.save();
-    res.json({ message: "Trip Updated", trip });
+    res.json({ message: "Trip Updated Successfully", trip });
 };
 
 module.exports.destroy = async (req, res) => {

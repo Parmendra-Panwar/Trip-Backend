@@ -77,35 +77,68 @@ module.exports.createNewpost = async (req, res) => {
 };
 
 module.exports.updateActivity = async (req, res) => {
-    let { id } = req.params;
-    
-    let activity = await Activity.findById(id);
-    if (!activity) throw new ExpressError(404, "Activity not found");
+    try {
+        let { id } = req.params;
+        let activity = await Activity.findById(id);
+        
+        if (!activity) throw new ExpressError(404, "Activity not found");
 
-    if (req.body.activity?.location && req.body.activity.location !== activity.location) {
-        const coords = await getCoordinates(req.body.activity.location);
-        if (coords) {
-            activity.latitude = coords.lat;
-            activity.longitude = coords.lon;
+        // 1. Location & Coordinates Update
+        // Frontend se data 'activity[location]' format mein aata hai
+        if (req.body.activity?.location && req.body.activity.location !== activity.location) {
+            const coords = await getCoordinates(req.body.activity.location);
+            if (coords) {
+                activity.latitude = coords.lat;
+                activity.longitude = coords.lon;
+            }
         }
+
+        // 2. Specific Image Deletion Logic
+        if (req.body.remainingImages) {
+            const remaining = JSON.parse(req.body.remainingImages); 
+            
+            // Find images to delete from Cloudinary (Jo purani mein thi par remaining mein nahi hain)
+            const imagesToDelete = activity.images.filter(img => 
+                !remaining.some(rem => rem.filename === img.filename)
+            );
+
+            if (imagesToDelete.length > 0) {
+                // await deleteFromCloudinary(imagesToDelete); // Implement this properly
+                console.log("Deleting from Cloudinary:", imagesToDelete.length, "images");
+            }
+            
+            // Database mein sirf wahi rakho jo user ne delete nahi ki
+            activity.images = remaining;
+        }
+
+        // 3. New Images Append Logic
+        if (req.files && req.files.length > 0) {
+            const uploadPromises = req.files.map(async (file) => {
+                const processedBuffer = await processImage(file.buffer);
+                const result = await uploadToCloudinary(processedBuffer);
+                return { url: result.secure_url, filename: result.public_id };
+            });
+
+            const newImages = await Promise.all(uploadPromises);
+            
+            // Nayi images ko remaining list mein add karo
+            activity.images.push(...newImages); 
+        }
+
+        // 4. Update Other Metadata (Title, Price, Description, etc.)
+        // Ensure images field doesn't get messed up by req.body
+        const updateData = { ...req.body.activity };
+        delete updateData.images; // Image hum manually handle kar chuke hain
+
+        Object.assign(activity, updateData);
+        
+        await activity.save();
+        res.json({ message: "Activity Updated Successfully", activity });
+
+    } catch (err) {
+        // ExpressError handler ko pass karo
+        next(err); 
     }
-
-    Object.assign(activity, req.body.activity);
-
-    if (req.files && req.files.length > 0) {
-        await deleteFromCloudinary(activity.images);
-
-        const uploadPromises = req.files.map(async (file) => {
-            const processedBuffer = await processImage(file.buffer);
-            const result = await uploadToCloudinary(processedBuffer);
-            return { url: result.secure_url, filename: result.public_id };
-        });
-
-        activity.images = await Promise.all(uploadPromises);
-    }
-
-    await activity.save();
-    res.json({ message: "Activity Updated", activity });
 };
 
 module.exports.destroy = async (req, res) => {

@@ -88,12 +88,10 @@ module.exports.createNewpost = async (req, res) => {
 
 module.exports.updateListing = async (req, res) => {
     let { id } = req.params;
-    
-    // 1. Purani listing find karo
     let listing = await Listing.findById(id);
     if (!listing) throw new ExpressError(404, "Listing not found");
 
-    // 2. Check: Agar location update ho rahi hai toh Geocoding API call karo
+    // 1. Geocoding Logic (Agar location badli hai)
     if (req.body.listing?.location && req.body.listing.location !== listing.location) {
         const coords = await getCoordinates(req.body.listing.location);
         if (coords) {
@@ -102,26 +100,43 @@ module.exports.updateListing = async (req, res) => {
         }
     }
 
-    // 3. Baaki text fields update karo
-    Object.assign(listing, req.body.listing);
-
-    // 4. Image handling logic
-    if (req.files && req.files.length > 0) {
+    // 2. Selective Image Deletion (Cloudinary Sync)
+    if (req.body.remainingImages) {
+        const remaining = JSON.parse(req.body.remainingImages);
         
-        await deleteFromCloudinary(listing.images);
+        // Find images to delete (Jo purani list mein thi par new "remaining" list mein nahi hain)
+        const imagesToDelete = listing.images.filter(img => 
+            !remaining.some(rem => rem.filename === img.filename)
+        );
 
-        // Nayi images process aur upload karo
+        if (imagesToDelete.length > 0) {
+            await deleteFromCloudinary(imagesToDelete); 
+        }
+        
+        // DB update with remaining images
+        listing.images = remaining;
+    }
+
+    // 3. Append New Images (If any)
+    if (req.files && req.files.length > 0) {
         const uploadPromises = req.files.map(async (file) => {
             const processedBuffer = await processImage(file.buffer);
             const result = await uploadToCloudinary(processedBuffer);
             return { url: result.secure_url, filename: result.public_id };
         });
 
-        listing.images = await Promise.all(uploadPromises);
+        const newImages = await Promise.all(uploadPromises);
+        listing.images.push(...newImages); 
     }
 
+    // 4. Update Other Text Fields (Title, Price, etc.)
+    const updateData = { ...req.body.listing };
+    delete updateData.images; // Safety: images array humne upar handle kar liya hai
+
+    Object.assign(listing, updateData);
+
     await listing.save();
-    res.json({ message: "Listing Updated", listing });
+    res.json({ message: "Listing Updated Successfully", listing });
 };
 
 module.exports.destroy = async (req, res) => {
