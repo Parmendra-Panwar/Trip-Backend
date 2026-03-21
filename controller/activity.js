@@ -1,12 +1,15 @@
 const sharp = require('sharp');
 const mongoose = require('mongoose');
 const ExpressError = require("../utils/ExpressError.js");
+const Listing = require("../models/listing");
 const Activity = require("../models/activity");
 const Review = require("../models/review");
 const uploadToCloudinary = require("../utils/uploadToCloudinary.js");
 const getCoordinates = require("../utils/getCoordinates.js");
 const deleteFromCloudinary = require("../utils/deleteFromCloudinary.js");
 const processImage = require("../utils/imageProcess.js");
+const { getNearbyItems } = require("../services/spatialService");
+const { invalidateNearbyCache } = require("../services/cacheServiceRemove.js");
 
 module.exports.index = async (req, res) => {
   let { lastId, limit = 12 } = req.query;
@@ -47,10 +50,23 @@ module.exports.showActivity = async (req, res) => {
         }
     }
 
+    let nearbyActivities = { under3km: [], under5km: [] };
+    let nearbyListings = { under3km: [], under5km: [] };
+
+    // Agar spatial data hai, toh suggestions laao
+    if (activity.gridId && activity.latitude && activity.longitude) {
+        
+        // Promise.all use karo taaki dono queries parallel run hon (Time bachega)
+        [nearbyActivities, nearbyListings] = await Promise.all([
+            getNearbyItems(activity.latitude, activity.longitude, activity.gridId, activity._id, 'activity'),
+            getNearbyItems(activity.latitude, activity.longitude, activity.gridId, activity._id, 'listing')
+        ]);
+    }
+
     let latitude = activity.latitude || 20.5937;
     let longitude = activity.longitude || 78.9629;
 
-    res.json({ activity, latitude, longitude });
+    res.json({ activity, nearbyActivities, nearbyListings, latitude, longitude });
 };
 
 module.exports.createNewpost = async (req, res) => {
@@ -77,68 +93,65 @@ module.exports.createNewpost = async (req, res) => {
 };
 
 module.exports.updateActivity = async (req, res) => {
-    try {
-        let { id } = req.params;
-        let activity = await Activity.findById(id);
-        
-        if (!activity) throw new ExpressError(404, "Activity not found");
+    let { id } = req.params;
+    let activity = await Activity.findById(id);
+    
+    if (!activity) throw new ExpressError(404, "Activity not found");
 
-        // 1. Location & Coordinates Update
-        // Frontend se data 'activity[location]' format mein aata hai
-        if (req.body.activity?.location && req.body.activity.location !== activity.location) {
-            const coords = await getCoordinates(req.body.activity.location);
-            if (coords) {
-                activity.latitude = coords.lat;
-                activity.longitude = coords.lon;
-            }
+    // 1. Location & Coordinates Update
+    // Frontend se data 'activity[location]' format mein aata hai
+    if (req.body.activity?.location && req.body.activity.location !== activity.location) {
+        const coords = await getCoordinates(req.body.activity.location);
+        if (coords) {
+            activity.latitude = coords.lat;
+            activity.longitude = coords.lon;
+
+            listing.gridId = `LAT${Math.floor(coords.lat * 100)}LON${Math.floor(coords.lon * 100)}`;
         }
-
-        // 2. Specific Image Deletion Logic
-        if (req.body.remainingImages) {
-            const remaining = JSON.parse(req.body.remainingImages); 
-            
-            // Find images to delete from Cloudinary (Jo purani mein thi par remaining mein nahi hain)
-            const imagesToDelete = activity.images.filter(img => 
-                !remaining.some(rem => rem.filename === img.filename)
-            );
-
-            if (imagesToDelete.length > 0) {
-                // await deleteFromCloudinary(imagesToDelete); // Implement this properly
-                console.log("Deleting from Cloudinary:", imagesToDelete.length, "images");
-            }
-            
-            // Database mein sirf wahi rakho jo user ne delete nahi ki
-            activity.images = remaining;
-        }
-
-        // 3. New Images Append Logic
-        if (req.files && req.files.length > 0) {
-            const uploadPromises = req.files.map(async (file) => {
-                const processedBuffer = await processImage(file.buffer);
-                const result = await uploadToCloudinary(processedBuffer);
-                return { url: result.secure_url, filename: result.public_id };
-            });
-
-            const newImages = await Promise.all(uploadPromises);
-            
-            // Nayi images ko remaining list mein add karo
-            activity.images.push(...newImages); 
-        }
-
-        // 4. Update Other Metadata (Title, Price, Description, etc.)
-        // Ensure images field doesn't get messed up by req.body
-        const updateData = { ...req.body.activity };
-        delete updateData.images; // Image hum manually handle kar chuke hain
-
-        Object.assign(activity, updateData);
-        
-        await activity.save();
-        res.json({ message: "Activity Updated Successfully", activity });
-
-    } catch (err) {
-        // ExpressError handler ko pass karo
-        next(err); 
     }
+
+    // 2. Specific Image Deletion Logic
+    if (req.body.remainingImages) {
+        const remaining = JSON.parse(req.body.remainingImages); 
+        
+        // Find images to delete from Cloudinary (Jo purani mein thi par remaining mein nahi hain)
+        const imagesToDelete = activity.images.filter(img => 
+            !remaining.some(rem => rem.filename === img.filename)
+        );
+
+        if (imagesToDelete.length > 0) {
+            await deleteFromCloudinary(imagesToDelete); 
+        }
+        
+        // Database mein sirf wahi rakho jo user ne delete nahi ki
+        activity.images = remaining;
+    }
+
+    // 3. New Images Append Logic
+    if (req.files && req.files.length > 0) {
+        const uploadPromises = req.files.map(async (file) => {
+            const processedBuffer = await processImage(file.buffer);
+            const result = await uploadToCloudinary(processedBuffer);
+            return { url: result.secure_url, filename: result.public_id };
+        });
+
+        const newImages = await Promise.all(uploadPromises);
+        
+        // Nayi images ko remaining list mein add karo
+        activity.images.push(...newImages); 
+    }
+
+    // 4. Update Other Metadata (Title, Price, Description, etc.)
+    // Ensure images field doesn't get messed up by req.body
+    const updateData = { ...req.body.activity };
+    delete updateData.images; // Image hum manually handle kar chuke hain
+
+    Object.assign(activity, updateData);
+    
+    await activity.save();
+    await invalidateNearbyCache(id);
+
+    res.json({ message: "Activity Updated Successfully", activity });
 };
 
 module.exports.destroy = async (req, res) => {
@@ -156,5 +169,6 @@ module.exports.destroy = async (req, res) => {
     }
 
     await Activity.findByIdAndDelete(id);
+    await invalidateNearbyCache(id);
     res.json({ message: "Activity and all associated data deleted" });
 };

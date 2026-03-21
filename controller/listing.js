@@ -7,6 +7,8 @@ const uploadToCloudinary = require("../utils/uploadToCloudinary.js");
 const getCoordinates = require("../utils/getCoordinates.js");
 const deleteFromCloudinary = require("../utils/deleteFromCloudinary.js");
 const processImage = require("../utils/imageProcess.js")
+const { getNearbyItems } = require("../services/spatialService");
+const { invalidateNearbyCache } = require("../services/cacheServiceRemove.js");
 
 module.exports.index = async (req, res) => {
   // lastId ko string rehne dein, parseInt na karein
@@ -53,11 +55,30 @@ module.exports.showListing = async (req, res) => {
     }
     // 👆 TEMPORARY GEOCODING BLOCK END 👆
 
+    let nearbyActivities = { under3km: [], under5km: [] };
+    let nearbyListings = { under3km: [], under5km: [] };
+
+    // Agar spatial data hai, toh suggestions laao
+    if (listing.gridId && listing.latitude && listing.longitude) {
+        
+        // Promise.all use karo taaki dono queries parallel run hon (Time bachega)
+        [nearbyActivities, nearbyListings] = await Promise.all([
+            getNearbyItems(listing.latitude, listing.longitude, listing.gridId, listing._id, 'activity'),
+            getNearbyItems(listing.latitude, listing.longitude, listing.gridId, listing._id, 'listing')
+        ]);
+    }
+
     // Fallbacks if both DB and API fail
     let latitude = listing.latitude || 20.5937;
     let longitude = listing.longitude || 78.9629;
 
-    res.json({ listing, latitude, longitude });
+    res.json({ 
+        listing, 
+        nearbyActivities,
+        nearbyListings,    
+        latitude,
+        longitude
+    });
 };
 
 module.exports.createNewpost = async (req, res) => {
@@ -97,6 +118,8 @@ module.exports.updateListing = async (req, res) => {
         if (coords) {
             listing.latitude = coords.lat;
             listing.longitude = coords.lon;
+
+            listing.gridId = `LAT${Math.floor(coords.lat * 100)}LON${Math.floor(coords.lon * 100)}`;
         }
     }
 
@@ -136,6 +159,8 @@ module.exports.updateListing = async (req, res) => {
     Object.assign(listing, updateData);
 
     await listing.save();
+    await invalidateNearbyCache(id);
+
     res.json({ message: "Listing Updated Successfully", listing });
 };
 
@@ -154,5 +179,6 @@ module.exports.destroy = async (req, res) => {
     }
 
     await Listing.findByIdAndDelete(id);
+    await invalidateNearbyCache(id);
     res.json({ message: "Listing and all associated data deleted" });
 };

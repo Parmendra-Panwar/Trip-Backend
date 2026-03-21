@@ -22,7 +22,8 @@ const activitySchema = new Schema({
   },
   tags: [{ type: String, trim: true, lowercase: true }], // e.g., ["rafting", "trekking", "camping"]
   reviews: [{ type: Schema.Types.ObjectId, ref: 'Review' }],
-  user: { type: Schema.Types.ObjectId, ref: 'User', index: true }
+  user: { type: Schema.Types.ObjectId, ref: 'User', index: true },
+  gridId: { type: String, index: true },
 });
 
 activitySchema.post("findOneAndDelete", async (activity) => {

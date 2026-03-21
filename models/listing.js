@@ -23,7 +23,8 @@ const listingSchema = new Schema({
   longitude: { type: Number },
   tags: [{ type: String, trim: true, lowercase: true, default: ["wifi", "pool", "budget"] }],
   reviews: [{ type: Schema.Types.ObjectId, ref: 'Review' }],
-  user: { type: Schema.Types.ObjectId, ref: 'User', index: true }
+  user: { type: Schema.Types.ObjectId, ref: 'User', index: true },
+  gridId: { type: String, index: true },
 });
 
 listingSchema.post("findOneAndDelete", async (listing) => {
