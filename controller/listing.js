@@ -9,6 +9,7 @@ const deleteFromCloudinary = require("../utils/deleteFromCloudinary.js");
 const processImage = require("../utils/imageProcess.js")
 const { getNearbyItems } = require("../services/spatialService");
 const { invalidateNearbyCache } = require("../services/cacheServiceRemove.js");
+const { syncGridMetadata } = require('../services/gridService');
 
 module.exports.index = async (req, res) => {
   // lastId ko string rehne dein, parseInt na karein
@@ -92,6 +93,11 @@ module.exports.createNewpost = async (req, res) => {
     if (coords) {
         newList.latitude = coords.lat;
         newList.longitude = coords.lon;
+        
+        const generatedGridId = await syncGridMetadata(newList, 'listing');
+        if (generatedGridId) {
+            newList.gridId = generatedGridId;
+        }
     }
 
     // 2. Process and upload images (Sharp)

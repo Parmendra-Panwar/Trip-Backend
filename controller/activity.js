@@ -1,7 +1,5 @@
-const sharp = require('sharp');
 const mongoose = require('mongoose');
 const ExpressError = require("../utils/ExpressError.js");
-const Listing = require("../models/listing");
 const Activity = require("../models/activity");
 const Review = require("../models/review");
 const uploadToCloudinary = require("../utils/uploadToCloudinary.js");
@@ -10,6 +8,7 @@ const deleteFromCloudinary = require("../utils/deleteFromCloudinary.js");
 const processImage = require("../utils/imageProcess.js");
 const { getNearbyItems } = require("../services/spatialService");
 const { invalidateNearbyCache } = require("../services/cacheServiceRemove.js");
+const { syncGridMetadata } = require('../services/gridService');
 
 module.exports.index = async (req, res) => {
   let { lastId, limit = 12 } = req.query;
@@ -79,6 +78,11 @@ module.exports.createNewpost = async (req, res) => {
     if (coords) {
         newActivity.latitude = coords.lat;
         newActivity.longitude = coords.lon;
+
+        const generatedGridId = await syncGridMetadata(newList, 'listing');
+        if (generatedGridId) {
+            newList.gridId = generatedGridId;
+        }
     }
 
     const uploadPromises = req.files.map(async (file) => {
