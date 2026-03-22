@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router({ mergeParams: true });
 const profileController = require("../controller/profile.js");
-const wrapAsync = require("../utils/wrapAsync");
+const wrapAsync = require("../utilss/wrapAsync");
 const { isloggedIn } = require("../Validators/isAthen.js");
 
 router.get("/:username", wrapAsync(profileController.getProfile));

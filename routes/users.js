@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const userController = require("../controller/user.js");
-const wrapAsync = require("../utils/wrapAsync");
+const wrapAsync = require("../utilss/wrapAsync");
 const { isloggedIn } = require("../Validators/isAthen.js");
 
 // Route to login

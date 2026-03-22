@@ -1,2 +1,6 @@
 ﻿.env
 node_modules/
+init
+.gitignore
+scripts/
+utilss/
