@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const validateTrip = require("../Validators/tripValidator.js");
-const wrapAsync = require("../utils/wrapAsync.js");
+const wrapAsync = require("../utilss/wrapAsync.js");
 const { isloggedIn, isTripOwner } = require("../Validators/isAthen.js");
 const tripController = require("../controller/trip.js");
 const multer = require('multer')

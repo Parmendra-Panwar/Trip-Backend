@@ -7,7 +7,7 @@ const app = express();
 const cors = require("cors");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit"); // Rate limiter import
-const ExpressError = require("./utils/ExpressError.js");
+const ExpressError = require("./utilss/ExpressError.js");
 const connectDB = require("./config/db");
 
 // 1. Database Connection

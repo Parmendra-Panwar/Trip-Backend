@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const Activity = require("../models/activity");
 const Listing = require("../models/listing");
-const { getNeighborGrids, calculateDistance } = require("../utils/spatialMetrics");
+const { getNeighborGrids, calculateDistance } = require("../utilss/spatialMetrics");
 const redisClient = require('../config/redis'); 
 
 module.exports.getNearbyItems = async (lat, lon, gridId, excludeId, itemType = 'activity') => {

@@ -1,5 +1,5 @@
 const { activitySchema } = require("../schema.js");
-const ExpressError = require("../utils/ExpressError.js");
+const ExpressError = require("../utilss/ExpressError.js");
 
 const validateActivity = (req, res, next) => {
   let { error } = activitySchema.validate(req.body);

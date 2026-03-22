@@ -1,12 +1,12 @@
 const sharp = require('sharp');
 const mongoose = require('mongoose');
-const ExpressError = require("../utils/ExpressError.js");
+const ExpressError = require("../utilss/ExpressError.js");
 const Listing = require("../models/listing");
 const Review = require("../models/review");
-const uploadToCloudinary = require("../utils/uploadToCloudinary.js");
-const getCoordinates = require("../utils/getCoordinates.js");
-const deleteFromCloudinary = require("../utils/deleteFromCloudinary.js");
-const processImage = require("../utils/imageProcess.js")
+const uploadToCloudinary = require("../utilss/uploadToCloudinary.js");
+const getCoordinates = require("../utilss/getCoordinates.js");
+const deleteFromCloudinary = require("../utilss/deleteFromCloudinary.js");
+const processImage = require("../utilss/imageProcess.js")
 const { getNearbyItems } = require("../services/spatialService");
 const { invalidateNearbyCache } = require("../services/cacheServiceRemove.js");
 const { syncGridMetadata } = require('../services/gridService');

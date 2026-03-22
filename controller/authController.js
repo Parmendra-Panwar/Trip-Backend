@@ -3,7 +3,7 @@ const TravelProfile = require("../models/travelProfile");
 const BusinessProfile = require("../models/businessProfile");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const ExpressError = require("../utils/ExpressError");
+const ExpressError = require("../utilss/ExpressError");
 
 module.exports.signup = async (req, res, next) => {
   const { username, email, password, accountType } = req.body;

@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const validateActivity = require("../Validators/activityValidator.js");
-const wrapAsync = require("../utils/wrapAsync.js");
+const wrapAsync = require("../utilss/wrapAsync.js");
 const { isloggedIn, isActivityOwner } = require("../Validators/isAthen.js");
 const activityController = require("../controller/activity.js");
 const multer = require('multer')

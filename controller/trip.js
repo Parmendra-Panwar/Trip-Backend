@@ -1,11 +1,11 @@
 const sharp = require('sharp');
 const mongoose = require('mongoose');
-const ExpressError = require("../utils/ExpressError.js");
+const ExpressError = require("../utilss/ExpressError.js");
 const Trip = require("../models/trip");
 const Review = require("../models/review");
-const uploadToCloudinary = require("../utils/uploadToCloudinary.js");
-const deleteFromCloudinary = require("../utils/deleteFromCloudinary.js");
-const processImage = require("../utils/imageProcess.js");
+const uploadToCloudinary = require("../utilss/uploadToCloudinary.js");
+const deleteFromCloudinary = require("../utilss/deleteFromCloudinary.js");
+const processImage = require("../utilss/imageProcess.js");
 
 module.exports.index = async (req, res) => {
   let { lastId, limit = 12 } = req.query;
