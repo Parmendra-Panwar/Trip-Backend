@@ -9,7 +9,7 @@ const deleteFromCloudinary = require("../utilss/deleteFromCloudinary.js");
 const processImage = require("../utilss/imageProcess.js")
 const { getNearbyItems } = require("../services/spatialService");
 const { invalidateNearbyCache } = require("../services/cacheServiceRemove.js");
-const { syncGridMetadata } = require('../services/gridService');
+const { syncGridMetadata, removeGridMetadata } = require('../services/gridService');
 
 module.exports.index = async (req, res) => {
   // lastId ko string rehne dein, parseInt na karein
@@ -94,9 +94,10 @@ module.exports.createNewpost = async (req, res) => {
         newList.latitude = coords.lat;
         newList.longitude = coords.lon;
         
-        const generatedGridId = await syncGridMetadata(newList, 'listing');
-        if (generatedGridId) {
-            newList.gridId = generatedGridId;
+        const generatedGrids = await syncGridMetadata(newList, 'listing');
+        if (generatedGrids) {
+            newList.gridId = generatedGrids.gridId;
+            newList.cityGridId = generatedGrids.cityGridId;
         }
     }
 
@@ -122,10 +123,18 @@ module.exports.updateListing = async (req, res) => {
     if (req.body.listing?.location && req.body.listing.location !== listing.location) {
         const coords = await getCoordinates(req.body.listing.location);
         if (coords) {
+            // Remove old counts
+            await removeGridMetadata(listing, 'listing');
+
             listing.latitude = coords.lat;
             listing.longitude = coords.lon;
 
-            listing.gridId = `LAT${Math.floor(coords.lat * 100)}LON${Math.floor(coords.lon * 100)}`;
+            // Sync new counts
+            const generatedGrids = await syncGridMetadata(listing, 'listing');
+            if (generatedGrids) {
+                listing.gridId = generatedGrids.gridId;
+                listing.cityGridId = generatedGrids.cityGridId;
+            }
         }
     }
 
@@ -183,6 +192,8 @@ module.exports.destroy = async (req, res) => {
     if (listing.reviews.length > 0) {
         await Review.deleteMany({ _id: { $in: listing.reviews } });
     }
+
+    await removeGridMetadata(listing, 'listing');
 
     await Listing.findByIdAndDelete(id);
     await invalidateNearbyCache(id);

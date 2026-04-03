@@ -1,11 +1,10 @@
-const User = require("../models/user"); // Path check kar lena apne folder structure ke hisaab se
+const User = require("../models/user");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 module.exports.login = async (req, res, next) => {
   const { email, password } = req.body;
 
-  // Validation Check
   if (!email || !password) {
     return res.status(400).json({ error: "Email and password are required" });
   }
