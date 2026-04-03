@@ -19,7 +19,7 @@ module.exports.getProfile = async (req, res) => {
 
   const isNormal = user.roles.includes('NORMAL');
   const isBusiness = user.roles.includes('BUSINESS');
-  
+
   let data = { user, trips: [], activities: [], listings: [] };
   let hasNext = { trips: false, activities: false, listings: false };
 
@@ -27,7 +27,7 @@ module.exports.getProfile = async (req, res) => {
   if (isNormal) {
     const trips = await Trip.find({ user: user._id }).skip(skip).limit(fetchLimit);
     hasNext.trips = trips.length > limit;
-    data.trips = trips.slice(0, limit); 
+    data.trips = trips.slice(0, limit);
   }
   if (isBusiness) {
     const activities = await Activity.find({ user: user._id }).skip(skip).limit(fetchLimit);
@@ -38,19 +38,20 @@ module.exports.getProfile = async (req, res) => {
     hasNext.listings = listings.length > limit;
     data.listings = listings.slice(0, limit);
   }
+  hasNext = { trips: false, activities: false, listings: false };
 
   res.json({
     ...data,
     currentPage: Number(page),
     hasNext,
-    followers: 1200, 
+    followers: 1200,
     following: 350
   });
 };
 
 module.exports.updateProfile = async (req, res) => {
   const { username } = req.params;
-  const { about, roles } = req.body; 
+  const { about, roles } = req.body;
 
   const updatedUser = await User.findOneAndUpdate(
     { username },

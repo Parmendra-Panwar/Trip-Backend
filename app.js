@@ -61,6 +61,7 @@ const reviewsRouter = require("./routes/review.js");
 const usersRouter = require("./routes/users.js");
 const authRouter = require("./routes/authrouter.js");
 const profileRouter = require("./routes/profile.js");
+const itineraryRouter = require("./routes/itinerary.js");
 
 app.get("/", (req, res) => {
   res.json({ message: "TripLinker API is live and secure!" });
@@ -73,6 +74,7 @@ app.use("/api/v1/:type/:id/reviews", reviewsRouter);
 app.use("/api/v1/auth/login", usersRouter);
 app.use("/api/v1/auth/signup", authRouter);
 app.use("/api/v1/profile", profileRouter);
+app.use("/api/v1/itinerary", itineraryRouter);
 
 // 4. Error Handlers
 app.all("*", (req, res, next) => {

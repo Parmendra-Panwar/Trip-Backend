@@ -25,6 +25,7 @@ const listingSchema = new Schema({
   reviews: [{ type: Schema.Types.ObjectId, ref: 'Review' }],
   user: { type: Schema.Types.ObjectId, ref: 'User', index: true },
   gridId: { type: String, index: true },
+  cityGridId: { type: String, index: true },
 });
 
 listingSchema.post("findOneAndDelete", async (listing) => {

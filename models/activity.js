@@ -24,6 +24,7 @@ const activitySchema = new Schema({
   reviews: [{ type: Schema.Types.ObjectId, ref: 'Review' }],
   user: { type: Schema.Types.ObjectId, ref: 'User', index: true },
   gridId: { type: String, index: true },
+  cityGridId: { type: String, index: true },
 });
 
 activitySchema.post("findOneAndDelete", async (activity) => {
