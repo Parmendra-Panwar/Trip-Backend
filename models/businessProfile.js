@@ -1,5 +1,5 @@
-const mongoose = require("mongoose");
-const Schema = mongoose.Schema;
+import mongoose from "mongoose";
+const { Schema } = mongoose;
 
 const businessProfileSchema = new Schema({
   user: { type: Schema.Types.ObjectId, ref: 'User' },
@@ -7,4 +7,4 @@ const businessProfileSchema = new Schema({
   isVerified: { type: Boolean, default: false }
 });
 
-module.exports = mongoose.model("BusinessProfile", businessProfileSchema);
+export default mongoose.model("BusinessProfile", businessProfileSchema);

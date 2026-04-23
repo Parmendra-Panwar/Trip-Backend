@@ -1,13 +1,12 @@
-const sharp = require('sharp');
-const mongoose = require('mongoose');
-const ExpressError = require("../utilss/ExpressError.js");
-const Trip = require("../models/trip");
-const Review = require("../models/review");
-const uploadToCloudinary = require("../utilss/uploadToCloudinary.js");
-const deleteFromCloudinary = require("../utilss/deleteFromCloudinary.js");
-const processImage = require("../utilss/imageProcess.js");
+import mongoose from 'mongoose';
+import { ExpressError } from "../utils/ExpressError.js";
+import Trip from "../models/trip.js";
+import Review from "../models/review.js";
+import uploadToCloudinary from "../utils/uploadToCloudinary.js";
+import deleteFromCloudinary from "../utils/deleteFromCloudinary.js";
+import processImage from "../utils/imageProcess.js";
 
-module.exports.index = async (req, res) => {
+export const index = async (req, res) => {
   let { lastId, limit = 12 } = req.query;
   limit = parseInt(limit);
 
@@ -29,7 +28,7 @@ module.exports.index = async (req, res) => {
   });
 };
 
-module.exports.showTrip = async (req, res) => {
+export const showTrip = async (req, res) => {
     let { id } = req.params;
     const trip = await Trip.findById(id)
         .populate({ path: "reviews", populate: { path: "author", select: "username" } })
@@ -40,7 +39,7 @@ module.exports.showTrip = async (req, res) => {
     res.json({ trip });
 };
 
-module.exports.createNewpost = async (req, res) => {
+export const createNewpost = async (req, res) => {
     if (!req.files || req.files.length === 0) throw new ExpressError(400, "At least one image is required");
 
     const newTrip = new Trip(req.body.trip);
@@ -57,7 +56,7 @@ module.exports.createNewpost = async (req, res) => {
     res.status(201).json(newTrip);
 };
 
-module.exports.updateTrip = async (req, res) => {
+export const updateTrip = async (req, res) => {
     let { id } = req.params;
     let trip = await Trip.findById(id);
     if (!trip) throw new ExpressError(404, "Trip not found");
@@ -99,7 +98,7 @@ module.exports.updateTrip = async (req, res) => {
     res.json({ message: "Trip Updated Successfully", trip });
 };
 
-module.exports.destroy = async (req, res) => {
+export const destroy = async (req, res) => {
     let { id } = req.params;
 
     const trip = await Trip.findById(id);

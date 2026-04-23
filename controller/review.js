@@ -1,7 +1,7 @@
-const Listing = require("../models/listing");
-const Trip = require("../models/trip");
-const Activity = require("../models/activity");
-const Review = require("../models/review");
+import Listing from "../models/listing.js";
+import Trip from "../models/trip.js";
+import Activity from "../models/activity.js";
+import Review from "../models/review.js";
 
 // Helper function to get the correct model dynamically
 const getModelByType = (type) => {
@@ -13,7 +13,7 @@ const getModelByType = (type) => {
     return models[type];
 };
 
-module.exports.createNewReview = async (req, res) => {
+export const createNewReview = async (req, res) => {
     const { type, id } = req.params;
     const TargetModel = getModelByType(type);
 
@@ -37,7 +37,7 @@ module.exports.createNewReview = async (req, res) => {
     res.status(201).json({ message: "Review added successfully", review: newReview });
 };
 
-module.exports.deleteReview = async (req, res) => {
+export const deleteReview = async (req, res) => {
     const { type, id, reviewId } = req.params;
     const TargetModel = getModelByType(type);
 

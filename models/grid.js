@@ -1,10 +1,11 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
+const { Schema } = mongoose;
 
-const gridSchema = new mongoose.Schema({
+const gridSchema = new Schema({
     gridId: { type: String, unique: true, index: true },
     city: String,
     minPriceStay: { type: Number, default: Infinity },
     activityCount: { type: Number, default: 0 },
     listingCount: { type: Number, default: 0 },
 });
-module.exports = mongoose.model('Grid', gridSchema);
+export default mongoose.model('Grid', gridSchema);

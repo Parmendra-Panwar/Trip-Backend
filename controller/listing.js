@@ -1,17 +1,16 @@
-const sharp = require('sharp');
-const mongoose = require('mongoose');
-const ExpressError = require("../utilss/ExpressError.js");
-const Listing = require("../models/listing");
-const Review = require("../models/review");
-const uploadToCloudinary = require("../utilss/uploadToCloudinary.js");
-const getCoordinates = require("../utilss/getCoordinates.js");
-const deleteFromCloudinary = require("../utilss/deleteFromCloudinary.js");
-const processImage = require("../utilss/imageProcess.js")
-const { getNearbyItems } = require("../services/spatialService");
-const { invalidateNearbyCache } = require("../services/cacheServiceRemove.js");
-const { syncGridMetadata, removeGridMetadata } = require('../services/gridService');
+import mongoose from 'mongoose';
+import { ExpressError } from "../utils/ExpressError.js";
+import Listing from "../models/listing.js";
+import Review from "../models/review.js";
+import uploadToCloudinary from "../utils/uploadToCloudinary.js";
+import getCoordinates from "../utils/getCoordinates.js";
+import deleteFromCloudinary from "../utils/deleteFromCloudinary.js";
+import processImage from "../utils/imageProcess.js";
+import { getNearbyItems } from "../services/spatialService.js";
+import { invalidateNearbyCache } from "../services/cacheServiceRemove.js";
+import { syncGridMetadata, removeGridMetadata } from '../services/gridService.js';
 
-module.exports.index = async (req, res) => {
+export const index = async (req, res) => {
   // lastId ko string rehne dein, parseInt na karein
   let { lastId, limit = 12 } = req.query;
   limit = parseInt(limit);
@@ -37,7 +36,7 @@ module.exports.index = async (req, res) => {
   });
 };
 
-module.exports.showListing = async (req, res) => {
+export const showListing = async (req, res) => {
     let { id } = req.params;
     const listing = await Listing.findById(id)
         .populate({ path: "reviews", populate: { path: "author", select: "username" } })
@@ -82,7 +81,7 @@ module.exports.showListing = async (req, res) => {
     });
 };
 
-module.exports.createNewpost = async (req, res) => {
+export const createNewpost = async (req, res) => {
     if (!req.files || req.files.length === 0) throw new ExpressError(400, "At least one image is required");
 
     const newList = new Listing(req.body.listing);
@@ -114,7 +113,7 @@ module.exports.createNewpost = async (req, res) => {
     res.status(201).json(newList);
 };
 
-module.exports.updateListing = async (req, res) => {
+export const updateListing = async (req, res) => {
     let { id } = req.params;
     let listing = await Listing.findById(id);
     if (!listing) throw new ExpressError(404, "Listing not found");
@@ -179,7 +178,7 @@ module.exports.updateListing = async (req, res) => {
     res.json({ message: "Listing Updated Successfully", listing });
 };
 
-module.exports.destroy = async (req, res) => {
+export const destroy = async (req, res) => {
     let { id } = req.params;
 
     const listing = await Listing.findById(id);

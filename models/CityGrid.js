@@ -1,6 +1,7 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
+const { Schema } = mongoose;
 
-const cityGridSchema = new mongoose.Schema({
+const cityGridSchema = new Schema({
     cityGridId: { type: String, unique: true, index: true },
     city: String,
     centerLat: Number,
@@ -12,4 +13,4 @@ const cityGridSchema = new mongoose.Schema({
     listingCount: { type: Number, default: 0 },
 });
 
-module.exports = mongoose.model('CityGrid', cityGridSchema);
+export default mongoose.model('CityGrid', cityGridSchema);

@@ -1,6 +1,6 @@
-const mongoose = require("mongoose");
-const Schema = mongoose.Schema;
-const Review = require("./review.js");
+import mongoose from "mongoose";
+const { Schema } = mongoose;
+import Review from "./review.js";
 
 const activitySchema = new Schema({
   title: { type: String, required: true },
@@ -31,4 +31,4 @@ activitySchema.post("findOneAndDelete", async (activity) => {
   if (activity) await Review.deleteMany({ _id: { $in: activity.reviews } });
 });
 
-module.exports = mongoose.model("Activity", activitySchema);
+export default mongoose.model("Activity", activitySchema);

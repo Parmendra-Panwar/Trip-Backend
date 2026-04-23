@@ -1,15 +1,15 @@
-const User = require("../models/user");
-const Trip = require("../models/trip");
-const Activity = require("../models/activity");
-const Listing = require("../models/listing");
+import User from "../models/user.js";
+import Trip from "../models/trip.js";
+import Activity from "../models/activity.js";
+import Listing from "../models/listing.js";
 
-module.exports.getProfile = async (req, res) => {
+export const getProfile = async (req, res) => {
   const { username } = req.params;
-  const { page = 1, limit = 12 } = req.query;
+  const page = Number(req.query.page) || 1;
+  const limit = Number(req.query.limit) || 12;
   const skip = (page - 1) * limit;
 
-  // Fetch one extra item to check if a next page exists
-  const fetchLimit = Number(limit) + 1;
+  const fetchLimit = limit + 1;
 
   const user = await User.findOne({ username })
     .populate('travelProfile')
@@ -23,12 +23,12 @@ module.exports.getProfile = async (req, res) => {
   let data = { user, trips: [], activities: [], listings: [] };
   let hasNext = { trips: false, activities: false, listings: false };
 
-  // Fetch conditionally based on roles
   if (isNormal) {
     const trips = await Trip.find({ user: user._id }).skip(skip).limit(fetchLimit);
     hasNext.trips = trips.length > limit;
     data.trips = trips.slice(0, limit);
   }
+  
   if (isBusiness) {
     const activities = await Activity.find({ user: user._id }).skip(skip).limit(fetchLimit);
     hasNext.activities = activities.length > limit;
@@ -38,18 +38,17 @@ module.exports.getProfile = async (req, res) => {
     hasNext.listings = listings.length > limit;
     data.listings = listings.slice(0, limit);
   }
-  hasNext = { trips: false, activities: false, listings: false };
-
+  
   res.json({
     ...data,
-    currentPage: Number(page),
+    currentPage: page,
     hasNext,
     followers: 1200,
     following: 350
   });
 };
 
-module.exports.updateProfile = async (req, res) => {
+export const updateProfile = async (req, res) => {
   const { username } = req.params;
   const { about, roles } = req.body;
 
