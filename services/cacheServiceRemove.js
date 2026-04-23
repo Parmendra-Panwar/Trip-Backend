@@ -1,6 +1,6 @@
-const redisClient = require('../config/redis');
+import redisClient from '../config/redis.js';
 
-module.exports.invalidateNearbyCache = async (itemId) => {
+export const invalidateNearbyCache = async (itemId) => {
     try {
         const keys = [ `nearby:activity:${itemId}`, `nearby:listing:${itemId}` ];
         

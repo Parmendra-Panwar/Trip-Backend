@@ -1,11 +1,11 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
-const validateListing = require("../Validators/listingValidator.js");
-const wrapAsync = require("../utilss/wrapAsync.js");
-const { isloggedIn, isOwner } = require("../Validators/isAthen.js");
-const listingController = require("../controller/listing.js");
-const multer = require('multer')
-const { storage } = require("../config/cloudConfig.js")
+import validateListing from "../Validators/listingValidator.js";
+import wrapAsync from "../utils/wrapAsync.js";
+import { isloggedIn, isOwner } from "../Validators/isAthen.js";
+import * as listingController from "../controller/listing.js";
+import multer from 'multer';
+import { storage } from "../config/cloudConfig.js"
 const upload = multer({ storage })
 
 
@@ -33,4 +33,4 @@ router.route("/:id")
     wrapAsync(listingController.updateListing)
   );
 
-module.exports = router;
+export default router;

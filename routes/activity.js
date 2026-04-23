@@ -1,11 +1,11 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
-const validateActivity = require("../Validators/activityValidator.js");
-const wrapAsync = require("../utilss/wrapAsync.js");
-const { isloggedIn, isActivityOwner } = require("../Validators/isAthen.js");
-const activityController = require("../controller/activity.js");
-const multer = require('multer')
-const { storage } = require("../config/cloudConfig.js")
+import validateActivity from "../Validators/activityValidator.js";
+import wrapAsync from "../utils/wrapAsync.js";
+import { isloggedIn, isActivityOwner } from "../Validators/isAthen.js";
+import * as activityController from "../controller/activity.js";
+import multer from 'multer'
+import { storage } from "../config/cloudConfig.js"
 const upload = multer({ storage })
 
 router.route("/")
@@ -32,4 +32,4 @@ router.route("/:id")
     wrapAsync(activityController.updateActivity)
   );
 
-module.exports = router;
+export default router;

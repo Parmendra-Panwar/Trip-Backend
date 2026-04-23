@@ -1,4 +1,4 @@
-module.exports = (fn) => {
+export default (fn) => {
   return async (req, res, next) => {
     try {
       await fn(req, res, next);

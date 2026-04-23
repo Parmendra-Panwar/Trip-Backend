@@ -1,6 +1,6 @@
-// const mongoose = require("mongoose");
-// const Listing = require("../models/listing");
-// const path = require('path');
+// const mongoose from "mongoose");
+// const Listing from "../models/listing");
+// const path from 'path');
 // require('dotenv').config({ path: path.join(__dirname, '../.env') });
 
 // async function migrate() {

@@ -1,5 +1,5 @@
-const { reviewSchema } = require("../schema.js");
-const ExpressError = require("../utilss/ExpressError.js");
+import { reviewSchema } from "../schema.js";
+import { ExpressError } from "../utils/ExpressError.js";
 
 const validateReview = (req, res, next) => {
   let { error } = reviewSchema.validate(req.body);
@@ -11,4 +11,4 @@ const validateReview = (req, res, next) => {
   }
 };
 
-module.exports = validateReview;
+export default validateReview;

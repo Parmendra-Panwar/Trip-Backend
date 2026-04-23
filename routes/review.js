@@ -1,9 +1,9 @@
-const express = require("express");
+import express from "express";
 const router = express.Router({ mergeParams: true });
-const wrapAsync = require("../utilss/wrapAsync.js");
-const validateReview = require("../Validators/reviewValidator.js");
-const { isloggedIn, isReviewAuthor } = require("../Validators/isAthen.js");
-const reviewController = require("../controller/review.js");
+import wrapAsync from "../utils/wrapAsync.js";
+import validateReview from "../Validators/reviewValidator.js";
+import { isloggedIn, isReviewAuthor } from "../Validators/isAthen.js";
+import * as reviewController from "../controller/review.js";
 
 //post
 router.post(
@@ -19,4 +19,4 @@ router.delete(
   wrapAsync(reviewController.deleteReview)
 );
 
-module.exports = router;
+export default router;

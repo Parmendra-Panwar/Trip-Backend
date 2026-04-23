@@ -1,11 +1,11 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
-const Activity = require("../models/activity");
-const Listing = require("../models/listing");
-const { getNeighborGrids, calculateDistance } = require("../utilss/spatialMetrics");
-const redisClient = require('../config/redis'); 
+import Activity from "../models/activity.js";
+import Listing from "../models/listing.js";
+import { getNeighborGrids, calculateDistance } from "../utils/spatialMetrics.js";
+import redisClient from '../config/redis.js'; 
 
-module.exports.getNearbyItems = async (lat, lon, gridId, excludeId, itemType = 'activity') => {
+export const getNearbyItems = async (lat, lon, gridId, excludeId, itemType = 'activity') => {
     const Model = itemType === 'activity' ? Activity : Listing;
     const cacheKey = `nearby:${itemType}:${excludeId}`;
 

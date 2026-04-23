@@ -1,8 +1,7 @@
-const { calculateDistance } = require("./spatialMetrics");
-
+import { calculateDistance } from "./spatialMetrics.js";
 
 // Pass maxKmPerDay into the function
-module.exports.findPath = (startGridId, destGridId, corridorMap, destCoords, maxKmPerDay) => {
+export const findPath = (startGridId, destGridId, corridorMap, destCoords, maxKmPerDay) => {
     // Performance Fix: Pre-compute destination distance for all nodes
     // This saves millions of calculateDistance trig operations inside the loop
     for (let [id, grid] of corridorMap.entries()) {
