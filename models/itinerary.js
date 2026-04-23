@@ -1,5 +1,5 @@
-const mongoose = require("mongoose");
-const Schema = mongoose.Schema;
+import mongoose from "mongoose";
+const { Schema } = mongoose;
 
 const daySchema = new Schema({
     dayIndex: { type: Number, required: true },
@@ -24,4 +24,4 @@ const itinerarySchema = new Schema({
     createdAt: { type: Date, default: Date.now }
 });
 
-module.exports = mongoose.model("Itinerary", itinerarySchema);
+export default mongoose.model("Itinerary", itinerarySchema);

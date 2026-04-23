@@ -1,11 +1,11 @@
-const User = require("../models/user");
-const TravelProfile = require("../models/travelProfile");
-const BusinessProfile = require("../models/businessProfile");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const ExpressError = require("../utilss/ExpressError");
+import User from "../models/user.js";
+import TravelProfile from "../models/travelProfile.js";
+import BusinessProfile from "../models/businessProfile.js";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import { ExpressError } from "../utils/ExpressError.js";
 
-module.exports.signup = async (req, res, next) => {
+export const signup = async (req, res, next) => {
   const { username, email, password, accountType } = req.body;
 
   // 1. Validation

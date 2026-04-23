@@ -1,5 +1,5 @@
-const cloudinary = require('cloudinary').v2; // Use v2 for latest features
-const multer = require('multer');
+import { v2 as cloudinary } from 'cloudinary';
+import multer from 'multer';
 
 cloudinary.config({
   cloud_name: process.env.CLOUD_NAME,
@@ -7,10 +7,7 @@ cloudinary.config({
   api_secret: process.env.CLOUD_API_SECRET,
 });
 
-// Use Memory Storage so we can process the buffer with Sharp
-const storage = multer.memoryStorage();
+// Use Memory Storage for processing buffer with Sharp
+export const storage = multer.memoryStorage();
 
-module.exports = {
-  storage,
-  cloudinary
-};
+export { cloudinary };
