@@ -1,9 +1,11 @@
-const Listing = require("../models/listing")
-const Review = require("../models/review")
-const jwt = require("jsonwebtoken");
-const User = require("../models/user");
+import Listing from "../models/listing.js";
+import Review from "../models/review.js"
+import jwt from "jsonwebtoken";
+import User from "../models/user.js";
+import Activity from "../models/activity.js";
+import Trip from "../models/trip.js";
 
-module.exports.isloggedIn = async (req, res, next) => {
+export const isloggedIn = async (req, res, next) => {
   try {
     const token = req.headers.authorization?.split(" ")[1];
 
@@ -24,7 +26,7 @@ module.exports.isloggedIn = async (req, res, next) => {
   }
 }
 
-module.exports.isOwner = async (req, res, next) => {
+export const isOwner = async (req, res, next) => {
   try {
     let { id } = req.params;
     let listing = await Listing.findById(id);
@@ -41,7 +43,7 @@ module.exports.isOwner = async (req, res, next) => {
   }
 };
 
-module.exports.isReviewAuthor = async (req, res, next) => {
+export const isReviewAuthor = async (req, res, next) => {
   try {
     let { reviewId } = req.params;
     let review = await Review.findById(reviewId);
@@ -57,10 +59,9 @@ module.exports.isReviewAuthor = async (req, res, next) => {
   }
 };
 
-module.exports.isActivityOwner = async (req, res, next) => {
+export const isActivityOwner = async (req, res, next) => {
   try {
     let { id } = req.params;
-    let Activity = require("../models/activity");
     let activity = await Activity.findById(id);
 
     if (!activity) return res.status(404).json({ error: "Activity not found" });
@@ -74,10 +75,10 @@ module.exports.isActivityOwner = async (req, res, next) => {
   }
 };
 
-module.exports.isTripOwner = async (req, res, next) => {
+export const isTripOwner = async (req, res, next) => {
   try {
     let { id } = req.params;
-    let Trip = require("../models/trip");
+    
     let trip = await Trip.findById(id);
 
     if (!trip) return res.status(404).json({ error: "Trip not found" });

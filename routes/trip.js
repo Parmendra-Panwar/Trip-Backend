@@ -1,11 +1,12 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
-const validateTrip = require("../Validators/tripValidator.js");
-const wrapAsync = require("../utilss/wrapAsync.js");
-const { isloggedIn, isTripOwner } = require("../Validators/isAthen.js");
-const tripController = require("../controller/trip.js");
-const multer = require('multer')
-const { storage } = require("../config/cloudConfig.js")
+import validateTrip from "../Validators/tripValidator.js";
+import wrapAsync from "../utils/wrapAsync.js";
+import { isloggedIn, isTripOwner } from "../Validators/isAthen.js";
+import * as tripController from "../controller/trip.js";
+import multer from 'multer';
+import { storage } from "../config/cloudConfig.js"
+
 const upload = multer({ storage })
 
 router.route("/")
@@ -32,4 +33,4 @@ router.route("/:id")
     wrapAsync(tripController.updateTrip)
   );
 
-module.exports = router;
+export default router;

@@ -1,5 +1,5 @@
-const { Readable } = require('stream');
-const { cloudinary } = require("../config/cloudConfig.js");
+import { Readable } from 'stream';
+import { cloudinary } from "../config/cloudConfig.js";
 
 const uploadToCloudinary = (buffer) => {
     return new Promise((resolve, reject) => {
@@ -16,4 +16,4 @@ const uploadToCloudinary = (buffer) => {
     });
 };
 
-module.exports = uploadToCloudinary;
+export default uploadToCloudinary;

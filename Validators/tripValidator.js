@@ -1,5 +1,5 @@
-const { tripSchema } = require("../schema.js");
-const ExpressError = require("../utilss/ExpressError.js");
+import { tripSchema } from "../schema.js";
+import { ExpressError } from "../utils/ExpressError.js";
 
 const validateTrip = (req, res, next) => {
   let { error } = tripSchema.validate(req.body);
@@ -10,5 +10,4 @@ const validateTrip = (req, res, next) => {
     next();
   }
 };
-
-module.exports = validateTrip;
+export default validateTrip;

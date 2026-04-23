@@ -1,9 +1,9 @@
-const Grid = require('../models/grid');
-const CityGrid = require('../models/CityGrid');
+import  Grid from '../models/grid.js';
+import  CityGrid from '../models/CityGrid.js';
 
-const { calculateGridId, calculateCityGridId } = require('../utilss/gridIdGenerator');
+import  { calculateGridId, calculateCityGridId } from '../utils/gridIdGenerator.js';
 
-module.exports.syncGridMetadata = async (doc, type) => {
+export const syncGridMetadata = async (doc, type) => {
     if (!doc.latitude || !doc.longitude) return null;
 
     const gId = calculateGridId(doc.latitude, doc.longitude);
@@ -36,7 +36,7 @@ module.exports.syncGridMetadata = async (doc, type) => {
     }
 };
 
-module.exports.removeGridMetadata = async (doc, type) => {
+export const removeGridMetadata = async (doc, type) => {
     if (!doc.gridId || !doc.cityGridId) return;
 
     const isListing = type === 'listing';

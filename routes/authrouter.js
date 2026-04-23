@@ -1,9 +1,9 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
-const authController = require("../controller/authController");
-const wrapAsync = require("../utilss/wrapAsync");
+import * as authController from "../controller/authController.js";
+import wrapAsync from "../utils/wrapAsync.js";
 
 // Route to signup
 router.post("/", wrapAsync(authController.signup));
 
-module.exports = router;
+export default router;

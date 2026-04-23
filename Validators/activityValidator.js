@@ -1,5 +1,5 @@
-const { activitySchema } = require("../schema.js");
-const ExpressError = require("../utilss/ExpressError.js");
+import { activitySchema } from "../schema.js";
+import { ExpressError } from "../utils/ExpressError.js";
 
 const validateActivity = (req, res, next) => {
   let { error } = activitySchema.validate(req.body);
@@ -11,4 +11,4 @@ const validateActivity = (req, res, next) => {
   }
 };
 
-module.exports = validateActivity;
+export default validateActivity;

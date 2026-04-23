@@ -1,10 +1,11 @@
-const express = require("express");
+import express from "express";
 const router = express.Router({ mergeParams: true });
-const profileController = require("../controller/profile.js");
-const wrapAsync = require("../utilss/wrapAsync.js");
-const { isloggedIn } = require("../Validators/isAthen.js");
+
+import * as profileController from "../controller/profile.js";
+import wrapAsync from "../utils/wrapAsync.js";
+import { isloggedIn } from "../Validators/isAthen.js";
 
 router.get("/:username", wrapAsync(profileController.getProfile));
 router.put("/:username", isloggedIn, wrapAsync(profileController.updateProfile));
 
-module.exports = router;
+export default router;
